@@ -1,1 +1,63 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+form input, form select, form textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  width: 100%;
+  padding: 12px;
+  background: black;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.expense-card {
+  background: white;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+}
+
+.actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
