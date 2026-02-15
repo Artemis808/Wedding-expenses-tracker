@@ -6,7 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
     "Gifts": 70000, "Ritual": 50000, "Misc": 50000, "Contingency": 80000
   };
 
-  let totalBudget = parseFloat(localStorage.getItem("totalBudget")) || 1200000;
+  // Logic Change: Check if a budget exists in storage first, don't force 12L
+  let storedBudget = localStorage.getItem("totalBudget");
+  let totalBudget = storedBudget !== null ? parseFloat(storedBudget) : 1200000;
+  
   let categories = JSON.parse(localStorage.getItem("categoryBudgets")) || defaultCategories;
   let expenses = JSON.parse(localStorage.getItem("weddingExpenses")) || [];
 
@@ -14,24 +17,17 @@ document.addEventListener("DOMContentLoaded", function () {
     localStorage.setItem("weddingExpenses", JSON.stringify(expenses));
     localStorage.setItem("totalBudget", totalBudget);
     localStorage.setItem("categoryBudgets", JSON.stringify(categories));
-  }
-
-  // Format numbers to Lakhs (e.g., 153000 -> 1.53L)
-  function formatLakhs(num) {
-    let absoluteNum = Math.abs(num);
-    if (absoluteNum >= 100000) {
-      return (num / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
+    
+    // Firebase Sync Placeholder
+    if (typeof db !== 'undefined') {
+      db.ref('weddingData').set({ totalBudget, categories, expenses });
     }
-    return num.toLocaleString('en-IN');
   }
 
-  function calculateMonthDayDiff(from, to) {
-    let months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
-    if (to.getDate() < from.getDate()) months--;
-    const temp = new Date(from);
-    temp.setMonth(temp.getMonth() + months);
-    const days = Math.round((to - temp) / (1000 * 60 * 60 * 24));
-    return { months, days };
+  function formatLakhs(num) {
+    let abs = Math.abs(num);
+    if (abs >= 100000) return (num / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
+    return num.toLocaleString('en-IN');
   }
 
   function render() {
@@ -39,101 +35,99 @@ document.addEventListener("DOMContentLoaded", function () {
     const engDate = new Date("2026-08-23");
     const wedDate = new Date("2026-11-11");
 
-    // Countdown
-    document.getElementById("engagementCountdown").innerText = today < engDate ? 
-      `${calculateMonthDayDiff(today, engDate).months}M, ${calculateMonthDayDiff(today, engDate).days}D left` : "Completed! 💍";
-    document.getElementById("weddingCountdown").innerText = today < wedDate ? 
-      `${calculateMonthDayDiff(today, wedDate).months}M, ${calculateMonthDayDiff(today, wedDate).days}D left` : "Wedding Day! 🎉";
+    const getDiff = (target) => {
+        let m = (target.getFullYear() - today.getFullYear()) * 12 + (target.getMonth() - today.getMonth());
+        if (target.getDate() < today.getDate()) m--;
+        const temp = new Date(today); temp.setMonth(temp.getMonth() + m);
+        const d = Math.round((target - temp) / (1000 * 60 * 60 * 24));
+        return `${m}M, ${d}D left`;
+    };
 
-    // Dashboard
-    let totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
-    let groomPaid = expenses.filter(e => e.paidBy === "Groom").reduce((sum, e) => sum + e.amount, 0);
+    document.getElementById("engagementCountdown").innerText = today < engDate ? getDiff(engDate) : "Completed! 💍";
+    document.getElementById("weddingCountdown").innerText = today < wedDate ? getDiff(wedDate) : "Wedding Day! 🎉";
+
+    let spent = expenses.reduce((s, e) => s + e.amount, 0);
+    let groomPaid = expenses.filter(e => e.paidBy === "Groom").reduce((s, e) => s + e.amount, 0);
     
-    document.getElementById("totalSpent").innerText = "₹" + formatLakhs(totalSpent);
-    document.getElementById("remaining").innerText = "₹" + formatLakhs(totalBudget - totalSpent);
+    document.getElementById("totalSpent").innerText = "₹" + formatLakhs(spent);
+    document.getElementById("remaining").innerText = "₹" + formatLakhs(totalBudget - spent);
     
-    const settlement = groomPaid - (totalSpent / 2);
+    const settlement = groomPaid - (spent / 2);
     const setEl = document.getElementById("settlement");
-    if (Math.abs(settlement) < 1) {
-        setEl.innerText = "Settled ✅";
-        setEl.style.color = "green";
-    } else {
-        setEl.innerText = settlement > 0 ? `Bride owes ₹${formatLakhs(settlement)}` : `Groom owes ₹${formatLakhs(Math.abs(settlement))}`;
-        setEl.style.color = "#d32f2f";
-    }
+    setEl.innerText = Math.abs(settlement) < 1 ? "Settled ✅" : (settlement > 0 ? `Bride owes ₹${formatLakhs(settlement)}` : `Groom owes ₹${formatLakhs(Math.abs(settlement))}`);
+    setEl.style.color = Math.abs(settlement) < 1 ? "green" : "#d32f2f";
 
-    // Category Settings List
-    const settingsDiv = document.getElementById("categorySettings");
-    const allocated = Object.values(categories).reduce((a,b)=>a+b,0);
-    settingsDiv.innerHTML = `<p style="font-size:12px; color:#666; margin-bottom:12px;">Allocated: ₹${allocated.toLocaleString()} / ₹${totalBudget.toLocaleString()}</p>`;
-    
+    // --- CATEGORY LIMITS EDITOR (Updated to format summary in Lakhs) ---
+    const setDiv = document.getElementById("categorySettings");
+    const currentAllocated = Object.values(categories).reduce((a,b)=>a+b,0);
+    setDiv.innerHTML = `<p style="font-size:12px; color:#666; margin-bottom:12px;">
+      Allocated: ₹${formatLakhs(currentAllocated)} / Total: ₹${formatLakhs(totalBudget)}
+    </p>`;
+
     Object.keys(categories).forEach(cat => {
-      const div = document.createElement("div");
-      div.style = "display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;";
-      div.innerHTML = `<span style="font-size:14px; font-weight:500;">${cat}</span>
-        <input type="number" class="cat-limit-input" data-cat="${cat}" value="${categories[cat]}" style="width:110px; padding:6px; border:1px solid #ddd; border-radius:6px;">`;
-      settingsDiv.appendChild(div);
+      const d = document.createElement("div");
+      d.style = "display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;";
+      d.innerHTML = `<span style="font-size:14px;">${cat}</span>
+        <input type="number" class="cat-limit-input" data-cat="${cat}" value="${categories[cat]}" 
+        style="width:100px; padding:5px; border:1px solid #ddd; border-radius:6px;">`;
+      setDiv.appendChild(d);
     });
 
-    // Category Progress Bars
     const catList = document.getElementById("categoryBudgetList");
     catList.innerHTML = "";
     Object.keys(categories).forEach(cat => {
-      const spent = expenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
-      const limit = categories[cat];
-      const percent = limit > 0 ? (spent / limit) * 100 : 0;
-      const row = document.createElement("div");
-      row.className = `category-row ${percent > 100 ? 'over-budget' : ''}`;
-      row.innerHTML = `<div class="cat-header"><span>${cat}</span><span>₹${formatLakhs(spent)} / ${formatLakhs(limit)}</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(percent, 100)}%"></div></div>`;
-      catList.appendChild(row);
+      const cSpent = expenses.filter(e => e.category === cat).reduce((s, e) => s + e.amount, 0);
+      const perc = (cSpent / categories[cat]) * 100;
+      catList.innerHTML += `<div class="category-row ${perc > 100 ? 'over-budget' : ''}">
+        <div class="cat-header"><span>${cat}</span><span>₹${formatLakhs(cSpent)} / ${formatLakhs(categories[cat])}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(perc, 100)}%"></div></div>
+      </div>`;
     });
 
-    // Populate Category Dropdown
     const select = document.getElementById("category");
     if(select.options.length <= 1) {
       Object.keys(categories).forEach(cat => {
-        const opt = document.createElement("option"); opt.value = cat; opt.textContent = cat;
-        select.appendChild(opt);
+        const opt = document.createElement("option"); opt.value = cat; opt.innerText = cat; select.appendChild(opt);
       });
     }
 
-    // Expense List
     const expList = document.getElementById("expenseList");
     expList.innerHTML = "";
-    [...expenses].reverse().forEach(exp => {
-      const div = document.createElement("div");
-      div.className = "expense-card";
-      div.innerHTML = `<strong>${exp.title}</strong> - ₹${formatLakhs(exp.amount)}
-        <div class="expense-info">${exp.date} | ${exp.category} | ${exp.paidBy}</div>
-        <div class="expense-actions" onclick="deleteExpense(${exp.id})">Delete</div>`;
-      expList.appendChild(div);
+    [...expenses].reverse().forEach(e => {
+      expList.innerHTML += `<div class="expense-card">
+        <strong>${e.title}</strong> - ₹${formatLakhs(e.amount)}
+        <div class="expense-info">${e.date} | ${e.category} | Paid by ${e.paidBy}</div>
+        <div class="expense-actions" onclick="deleteExpense(${e.id})">Delete</div>
+      </div>`;
     });
   }
 
-  window.updateTotalBudget = function() {
-    totalBudget = parseFloat(document.getElementById("totalBudgetInput").value) || 0;
-    saveAll(); render(); alert("Total Budget Updated!");
-  };
-
-  window.saveCategoryLimits = function() {
-    const inputs = document.querySelectorAll(".cat-limit-input");
-    let newTotal = 0;
-    const newCats = {};
-    inputs.forEach(i => {
-      const val = parseFloat(i.value) || 0;
-      newCats[i.getAttribute("data-cat")] = val;
-      newTotal += val;
-    });
-
-    if (newTotal !== totalBudget) {
-      alert(`Error: Categories add up to ₹${newTotal.toLocaleString()}, but Total Budget is ₹${totalBudget.toLocaleString()}. Difference: ₹${Math.abs(totalBudget - newTotal).toLocaleString()}`);
-      return;
+  window.updateTotalBudget = () => {
+    const newBudget = parseFloat(document.getElementById("totalBudgetInput").value);
+    if (!isNaN(newBudget)) {
+      totalBudget = newBudget;
+      saveAll(); 
+      render();
+      alert(`Budget set to ₹${formatLakhs(totalBudget)}`);
     }
-    categories = newCats; saveAll(); render(); alert("Limits Updated & Verified! ✅");
   };
 
-  document.getElementById("expenseForm").onsubmit = function(e) {
+  window.saveCategoryLimits = () => {
+    const inputs = document.querySelectorAll(".cat-limit-input");
+    let sum = 0; const newCats = {};
+    inputs.forEach(i => { const v = parseFloat(i.value) || 0; newCats[i.dataset.cat] = v; sum += v; });
+    
+    // We use Math.abs difference check to avoid tiny rounding errors
+    if (Math.abs(sum - totalBudget) > 1) {
+      return alert(`Total mismatch! \nCategories sum to: ₹${formatLakhs(sum)} \nTotal Budget is: ₹${formatLakhs(totalBudget)}`);
+    }
+    categories = newCats; 
+    saveAll(); 
+    render(); 
+    alert("Limits Updated! ✅");
+  };
+
+  document.getElementById("expenseForm").onsubmit = (e) => {
     e.preventDefault();
     expenses.push({
       id: Date.now(),
@@ -149,8 +143,32 @@ document.addEventListener("DOMContentLoaded", function () {
     saveAll(); render(); e.target.reset();
   };
 
-  window.deleteExpense = function(id) {
-    if(confirm("Delete this expense?")) { expenses = expenses.filter(e => e.id !== id); saveAll(); render(); }
+  window.deleteExpense = (id) => { if(confirm("Delete?")) { expenses = expenses.filter(e => e.id !== id); saveAll(); render(); }};
+
+  window.exportCSV = () => {
+    if (!expenses.length) return alert("No expenses to export!");
+    let csv = "Date,Title,Category,Amount,Paid By,Payment Mode,Notes\n";
+    expenses.forEach(e => csv += `${e.date},${e.title},${e.category},${e.amount},${e.paidBy},${e.paymentMode},"${e.notes || ''}"\n`);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'Wedding_Expenses.csv'; a.click();
+  };
+
+  window.backupData = () => {
+    const blob = new Blob([JSON.stringify({totalBudget, categories, expenses})], {type: 'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Wedding_Backup.json'; a.click();
+  };
+
+  window.restoreData = (ev) => {
+    const reader = new FileReader();
+    reader.onload = (e) => { 
+        const d = JSON.parse(e.target.result); 
+        expenses = d.expenses || []; 
+        categories = d.categories || defaultCategories; 
+        totalBudget = d.totalBudget || 1200000;
+        saveAll(); render(); alert("Restored Successfully!");
+    };
+    reader.readAsText(ev.target.files[0]);
   };
 
   render();
