@@ -12,11 +12,11 @@
   <h1>Wedding Expense Tracker</h1>
 
   <div class="countdown-container">
-    <div class="countdown-card" id="engagementCard">
+    <div class="countdown-card">
       <h3>Engagement 💍</h3>
       <p id="engagementCountdown">Calculating...</p>
     </div>
-    <div class="countdown-card" id="weddingCard">
+    <div class="countdown-card">
       <h3>Wedding 🎉</h3>
       <p id="weddingCountdown">Calculating...</p>
     </div>
@@ -45,7 +45,7 @@
   <h2>Manage Category Limits</h2>
   <div class="card" style="text-align: left; margin-bottom: 25px;">
     <div id="categorySettings"></div>
-    <button onclick="saveCategoryLimits()" style="width: 100%; padding: 14px; margin-top: 15px; background: #000; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+    <button onclick="saveCategoryLimits()" class="primary-btn">
       Save & Verify Limits
     </button>
   </div>
@@ -77,7 +77,7 @@
     <input type="number" id="amount" placeholder="Amount (₹)" required>
     <input type="text" id="invoiceLink" placeholder="Invoice Link (Optional)">
     <textarea id="notes" placeholder="Notes (Optional)" rows="2"></textarea>
-    <button type="submit">Save Expense</button>
+    <button type="submit" class="primary-btn">Save Expense</button>
   </form>
 
   <h2>Expenses</h2>
@@ -90,6 +90,24 @@
     <button onclick="document.getElementById('restoreInput').click()" class="secondary-btn">Restore Backup</button>
   </div>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+<script>
+  // CONFIGURATION STEP: Replace with your Firebase details later
+  const firebaseConfig = {
+    apiKey: "TEMP",
+    authDomain: "TEMP",
+    databaseURL: "TEMP",
+    projectId: "TEMP",
+    storageBucket: "TEMP",
+    messagingSenderId: "TEMP",
+    appId: "TEMP"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 
 <script src="app.js"></script>
 </body>
