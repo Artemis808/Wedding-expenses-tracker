@@ -1,1 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wedding Expense Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Wedding Expense Tracker</h1>
+
+    <div class="dashboard">
+      <div class="card">
+        <h3>Total Budget</h3>
+        <p id="totalBudget">₹12,00,000</p>
+      </div>
+
+      <div class="card">
+        <h3>Total Spent</h3>
+        <p id="totalSpent">₹0</p>
+      </div>
+
+      <div class="card">
+        <h3>Remaining</h3>
+        <p id="remaining">₹0</p>
+      </div>
+
+      <div class="card">
+        <h3>Settlement</h3>
+        <p id="settlement">₹0</p>
+      </div>
+    </div>
+
+    <h2>Add Expense</h2>
+
+    <form id="expenseForm">
+      <input type="date" id="date" required>
+      <input type="text" id="title" placeholder="Expense Title" required>
+
+      <select id="category">
+        <option>Venue & Catering</option>
+        <option>Decor</option>
+        <option>Photography</option>
+        <option>Apparel</option>
+        <option>Jewellery</option>
+        <option>Travel</option>
+        <option>Gifts</option>
+        <option>Ritual</option>
+        <option>Misc</option>
+        <option>Contingency</option>
+      </select>
+
+      <select id="paidBy">
+        <option>Groom</option>
+        <option>Bride</option>
+      </select>
+
+      <select id="paymentMode">
+        <option>UPI</option>
+        <option>Bank Transfer</option>
+        <option>Card</option>
+        <option>Cash</option>
+      </select>
+
+      <input type="number" id="amount" placeholder="Amount" required>
+      <input type="text" id="invoiceLink" placeholder="Google Drive Invoice Link">
+      <textarea id="notes" placeholder="Notes"></textarea>
+
+      <button type="submit">Add Expense</button>
+    </form>
+
+    <h2>Expenses</h2>
+    <div id="expenseList"></div>
+
+    <div class="actions">
+      <button onclick="exportCSV()">Export CSV</button>
+      <button onclick="backupData()">Download Backup</button>
+      <input type="file" id="restoreFile" onchange="restoreData(event)">
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
 
