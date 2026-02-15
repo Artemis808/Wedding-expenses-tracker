@@ -9,7 +9,6 @@
 <body>
 
 <div class="container">
-
   <h1>Wedding Expense Tracker</h1>
 
   <div class="countdown-container">
@@ -17,7 +16,6 @@
       <h3>Engagement 💍</h3>
       <p id="engagementCountdown">Calculating...</p>
     </div>
-
     <div class="countdown-card" id="weddingCard">
       <h3>Wedding 🎉</h3>
       <p id="weddingCountdown">Calculating...</p>
@@ -26,7 +24,7 @@
 
   <div class="budget-edit">
     <input type="number" id="totalBudgetInput" placeholder="Enter Total Budget">
-    <button onclick="updateTotalBudget()">Set Budget</button>
+    <button onclick="updateTotalBudget()">Set Total Budget</button>
   </div>
 
   <div class="dashboard">
@@ -34,16 +32,22 @@
       <h3>Total Spent</h3>
       <p id="totalSpent">₹0</p>
     </div>
-
     <div class="card">
       <h3>Remaining</h3>
       <p id="remaining">₹0</p>
     </div>
-
     <div class="card">
       <h3>Settlement</h3>
       <p id="settlement">₹0</p>
     </div>
+  </div>
+
+  <h2>Manage Category Limits</h2>
+  <div class="card" style="text-align: left; margin-bottom: 20px;">
+    <div id="categorySettings"></div>
+    <button onclick="saveCategoryLimits()" style="width: 100%; padding: 12px; margin-top: 15px; background: #333; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+      Save & Verify Limits
+    </button>
   </div>
 
   <h2>Category Budgets</h2>
@@ -55,17 +59,14 @@
       <input type="date" id="date" required>
       <input type="text" id="title" placeholder="Expense Title" required>
     </div>
-
     <select id="category" required>
       <option value="">Select Category</option>
     </select>
-
     <div class="form-row">
       <select id="paidBy">
         <option value="Groom">Paid By: Groom</option>
         <option value="Bride">Paid By: Bride</option>
       </select>
-
       <select id="paymentMode">
         <option value="UPI">UPI</option>
         <option value="Bank Transfer">Bank Transfer</option>
@@ -73,12 +74,9 @@
         <option value="Cash">Cash</option>
       </select>
     </div>
-
     <input type="number" id="amount" placeholder="Amount (₹)" required>
     <input type="text" id="invoiceLink" placeholder="Invoice/Drive Link (Optional)">
-    
     <textarea id="notes" placeholder="Notes (Optional)" rows="2"></textarea>
-
     <button type="submit">Save Expense</button>
   </form>
 
@@ -91,7 +89,6 @@
     <input type="file" id="restoreInput" onchange="restoreData(event)" style="display:none">
     <button onclick="document.getElementById('restoreInput').click()" class="secondary-btn">Restore Backup</button>
   </div>
-
 </div>
 
 <script src="app.js"></script>
