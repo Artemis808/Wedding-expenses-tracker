@@ -11,33 +11,38 @@
 
   <h1>Wedding Expense Tracker</h1>
 
+  <!-- COUNTDOWN SECTION -->
   <div class="countdown-container">
-    <div class="countdown-card fade-in" id="engagementCard">
+    <div class="countdown-card">
       <h3>Engagement</h3>
-      <p id="engagementCountdown"></p>
+      <p id="engagementCountdown">Loading...</p>
     </div>
 
-    <div class="countdown-card fade-in">
+    <div class="countdown-card">
       <h3>Wedding</h3>
-      <p id="weddingCountdown"></p>
+      <p id="weddingCountdown">Loading...</p>
     </div>
   </div>
 
+  <!-- BUDGET -->
   <div class="budget-edit">
     <label>Total Budget (₹)</label>
     <input type="number" id="totalBudgetInput">
     <button onclick="updateTotalBudget()">Update</button>
   </div>
 
+  <!-- DASHBOARD -->
   <div class="dashboard">
     <div class="card">
       <h3>Total Spent</h3>
       <p id="totalSpent">₹0</p>
     </div>
+
     <div class="card">
       <h3>Remaining</h3>
       <p id="remaining">₹0</p>
     </div>
+
     <div class="card">
       <h3>Settlement</h3>
       <p id="settlement">₹0</p>
@@ -53,7 +58,10 @@
     <input type="date" id="date" required>
     <input type="text" id="title" placeholder="Expense Title" required>
 
-    <select id="category"></select>
+    <!-- CATEGORY DROPDOWN (RESTORED) -->
+    <select id="category" required>
+      <option value="">Select Category</option>
+    </select>
 
     <select id="paidBy">
       <option>Groom</option>
