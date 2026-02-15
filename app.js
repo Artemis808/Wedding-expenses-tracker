@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
   
-  // --- 1. DATA LOADING ---
   const defaultCategories = {
     "Venue & Catering": 400000, "Decor": 100000, "Photography": 120000,
     "Apparel": 100000, "Jewellery": 150000, "Travel": 80000,
@@ -11,17 +10,16 @@ document.addEventListener("DOMContentLoaded", function () {
   let categories = JSON.parse(localStorage.getItem("categoryBudgets")) || defaultCategories;
   let expenses = JSON.parse(localStorage.getItem("weddingExpenses")) || [];
 
-  // --- 2. HELPERS ---
-
   function saveAll() {
     localStorage.setItem("weddingExpenses", JSON.stringify(expenses));
     localStorage.setItem("totalBudget", totalBudget);
     localStorage.setItem("categoryBudgets", JSON.stringify(categories));
   }
 
-  // Formats numbers to Lakhs (e.g., 153000 -> 1.53L)
+  // Format numbers to Lakhs (e.g., 153000 -> 1.53L)
   function formatLakhs(num) {
-    if (Math.abs(num) >= 100000) {
+    let absoluteNum = Math.abs(num);
+    if (absoluteNum >= 100000) {
       return (num / 100000).toFixed(2).replace(/\.00$/, '') + 'L';
     }
     return num.toLocaleString('en-IN');
@@ -36,14 +34,12 @@ document.addEventListener("DOMContentLoaded", function () {
     return { months, days };
   }
 
-  // --- 3. UI RENDERING ---
-
   function render() {
-    // Update Countdowns
     const today = new Date(); today.setHours(0,0,0,0);
     const engDate = new Date("2026-08-23");
     const wedDate = new Date("2026-11-11");
 
+    // Countdown
     document.getElementById("engagementCountdown").innerText = today < engDate ? 
       `${calculateMonthDayDiff(today, engDate).months}M, ${calculateMonthDayDiff(today, engDate).days}D left` : "Completed! 💍";
     document.getElementById("weddingCountdown").innerText = today < wedDate ? 
@@ -58,18 +54,24 @@ document.addEventListener("DOMContentLoaded", function () {
     
     const settlement = groomPaid - (totalSpent / 2);
     const setEl = document.getElementById("settlement");
-    setEl.innerText = settlement === 0 ? "Settled ✅" : 
-      (settlement > 0 ? `Bride owes ₹${formatLakhs(settlement)}` : `Groom owes ₹${formatLakhs(Math.abs(settlement))}`);
+    if (Math.abs(settlement) < 1) {
+        setEl.innerText = "Settled ✅";
+        setEl.style.color = "green";
+    } else {
+        setEl.innerText = settlement > 0 ? `Bride owes ₹${formatLakhs(settlement)}` : `Groom owes ₹${formatLakhs(Math.abs(settlement))}`;
+        setEl.style.color = "#d32f2f";
+    }
 
-    // Category Settings (Editor)
+    // Category Settings List
     const settingsDiv = document.getElementById("categorySettings");
-    settingsDiv.innerHTML = `<p style="font-size:12px; color:#666; margin-bottom:10px;">Allocated: ₹${Object.values(categories).reduce((a,b)=>a+b,0).toLocaleString()} / ₹${totalBudget.toLocaleString()}</p>`;
+    const allocated = Object.values(categories).reduce((a,b)=>a+b,0);
+    settingsDiv.innerHTML = `<p style="font-size:12px; color:#666; margin-bottom:12px;">Allocated: ₹${allocated.toLocaleString()} / ₹${totalBudget.toLocaleString()}</p>`;
     
     Object.keys(categories).forEach(cat => {
       const div = document.createElement("div");
-      div.style = "display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;";
-      div.innerHTML = `<span style="font-size:14px">${cat}</span>
-        <input type="number" class="cat-limit-input" data-cat="${cat}" value="${categories[cat]}" style="width:100px; padding:4px; border:1px solid #ddd; border-radius:4px;">`;
+      div.style = "display:flex; justify-content:space-between; margin-bottom:10px; align-items:center;";
+      div.innerHTML = `<span style="font-size:14px; font-weight:500;">${cat}</span>
+        <input type="number" class="cat-limit-input" data-cat="${cat}" value="${categories[cat]}" style="width:110px; padding:6px; border:1px solid #ddd; border-radius:6px;">`;
       settingsDiv.appendChild(div);
     });
 
@@ -78,10 +80,11 @@ document.addEventListener("DOMContentLoaded", function () {
     catList.innerHTML = "";
     Object.keys(categories).forEach(cat => {
       const spent = expenses.filter(e => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
-      const percent = (spent / categories[cat]) * 100;
+      const limit = categories[cat];
+      const percent = limit > 0 ? (spent / limit) * 100 : 0;
       const row = document.createElement("div");
       row.className = `category-row ${percent > 100 ? 'over-budget' : ''}`;
-      row.innerHTML = `<div class="cat-header"><span>${cat}</span><span>₹${formatLakhs(spent)} / ${formatLakhs(categories[cat])}</span></div>
+      row.innerHTML = `<div class="cat-header"><span>${cat}</span><span>₹${formatLakhs(spent)} / ${formatLakhs(limit)}</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(percent, 100)}%"></div></div>`;
       catList.appendChild(row);
     });
@@ -108,11 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // --- 4. ACTIONS ---
-
   window.updateTotalBudget = function() {
     totalBudget = parseFloat(document.getElementById("totalBudgetInput").value) || 0;
-    saveAll(); render();
+    saveAll(); render(); alert("Total Budget Updated!");
   };
 
   window.saveCategoryLimits = function() {
@@ -126,10 +127,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     if (newTotal !== totalBudget) {
-      alert(`Allocation Error: Categories total ₹${newTotal.toLocaleString()}, but Total Budget is ₹${totalBudget.toLocaleString()}. Please adjust by ₹${Math.abs(totalBudget - newTotal).toLocaleString()}.`);
+      alert(`Error: Categories add up to ₹${newTotal.toLocaleString()}, but Total Budget is ₹${totalBudget.toLocaleString()}. Difference: ₹${Math.abs(totalBudget - newTotal).toLocaleString()}`);
       return;
     }
-    categories = newCats; saveAll(); render(); alert("Limits updated! ✅");
+    categories = newCats; saveAll(); render(); alert("Limits Updated & Verified! ✅");
   };
 
   document.getElementById("expenseForm").onsubmit = function(e) {
@@ -149,9 +150,8 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   window.deleteExpense = function(id) {
-    if(confirm("Delete?")) { expenses = expenses.filter(e => e.id !== id); saveAll(); render(); }
+    if(confirm("Delete this expense?")) { expenses = expenses.filter(e => e.id !== id); saveAll(); render(); }
   };
 
-  // Run initial render
   render();
 });
