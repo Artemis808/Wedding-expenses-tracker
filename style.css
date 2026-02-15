@@ -1,41 +1,38 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f2f4f8;
   margin: 0;
 }
 
 .container {
-  max-width: 750px;
+  max-width: 760px;
   margin: auto;
   padding: 20px;
 }
 
-h1, h2 {
+h1 {
   text-align: center;
+  margin-bottom: 25px;
 }
 
 .countdown-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
 .countdown-card {
   background: white;
-  padding: 15px;
-  border-radius: 10px;
+  padding: 18px;
+  border-radius: 12px;
   text-align: center;
-  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: 0.3s;
 }
 
-.fade-in {
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+.countdown-card:hover {
+  transform: translateY(-2px);
 }
 
 .budget-edit {
@@ -47,52 +44,56 @@ h1, h2 {
 .budget-edit input {
   flex: 1;
   padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 .dashboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
 .card {
   background: white;
-  padding: 15px;
-  border-radius: 10px;
+  padding: 18px;
+  border-radius: 12px;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 form input, form select, form textarea {
   width: 100%;
-  padding: 10px;
-  margin: 6px 0;
+  padding: 12px;
+  margin: 8px 0;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
 
 form button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   background: black;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-top: 10px;
 }
 
 .expense-card {
   background: white;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
   position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .expense-actions {
   position: absolute;
-  right: 10px;
-  top: 10px;
+  right: 12px;
+  top: 12px;
   font-size: 12px;
   cursor: pointer;
   color: red;
@@ -100,11 +101,25 @@ form button {
 
 .category-row {
   background: white;
-  padding: 10px;
-  margin: 6px 0;
-  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.over-budget {
-  background: #ffe6e6;
+.progress-bar {
+  height: 8px;
+  background: #eee;
+  border-radius: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: black;
+}
+
+.over-budget .progress-fill {
+  background: red;
 }
