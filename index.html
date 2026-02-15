@@ -23,8 +23,8 @@
   </div>
 
   <div class="budget-edit">
-    <input type="number" id="totalBudgetInput" placeholder="Enter Total Budget">
-    <button onclick="updateTotalBudget()">Set Total Budget</button>
+    <input type="number" id="totalBudgetInput" placeholder="Enter Total Budget (e.g. 1200000)">
+    <button id="setBudgetBtn" class="primary-btn">Set Total Budget</button>
   </div>
 
   <div class="dashboard">
@@ -44,8 +44,11 @@
 
   <h2>Manage Category Limits</h2>
   <div class="card" style="text-align: left; margin-bottom: 25px;">
-    <div id="categorySettings"></div>
-    <button onclick="saveCategoryLimits()" class="primary-btn">
+    <div id="categorySettingsHeader" style="margin-bottom: 15px; font-weight: bold; color: #555;"></div>
+    
+    <div id="categorySettingsInputs"></div>
+    
+    <button id="saveLimitsBtn" class="primary-btn" style="margin-top: 15px;">
       Save & Verify Limits
     </button>
   </div>
@@ -95,7 +98,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
-  // CONFIGURATION STEP: Replace with your Firebase details later
+  // Placeholder Config - We will fill this in the next step
   const firebaseConfig = {
     apiKey: "TEMP",
     authDomain: "TEMP",
@@ -105,7 +108,9 @@
     messagingSenderId: "TEMP",
     appId: "TEMP"
   };
-  firebase.initializeApp(firebaseConfig);
+  if(firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+  }
   const db = firebase.database();
 </script>
 
