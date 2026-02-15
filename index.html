@@ -23,7 +23,7 @@
   </div>
 
   <div class="budget-edit">
-    <input type="number" id="totalBudgetInput" placeholder="Enter Total Budget (e.g. 1200000)">
+    <input type="text" inputmode="numeric" id="totalBudgetInput" placeholder="Enter Total Budget (e.g. 12,00,000)">
     <button id="setBudgetBtn" class="primary-btn">Set Total Budget</button>
   </div>
 
@@ -98,19 +98,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
 <script>
-  // Placeholder Config - We will fill this in the next step
+  // Placeholder Config
   const firebaseConfig = {
-    apiKey: "TEMP",
-    authDomain: "TEMP",
-    databaseURL: "TEMP",
-    projectId: "TEMP",
-    storageBucket: "TEMP",
-    messagingSenderId: "TEMP",
-    appId: "TEMP"
+    apiKey: "TEMP", authDomain: "TEMP", databaseURL: "TEMP",
+    projectId: "TEMP", storageBucket: "TEMP", messagingSenderId: "TEMP", appId: "TEMP"
   };
-  if(firebase.apps.length === 0) {
-      firebase.initializeApp(firebaseConfig);
-  }
+  if(firebase.apps.length === 0) firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 </script>
 
